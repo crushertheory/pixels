@@ -19,7 +19,7 @@ const App = (props) => {
   // const [colors, setColors] = useState(blues);
   const [amountOfColors, setAmountOfColors] = useState(3);
   const [amountOfRows, setAmountOfRows] = useState(12);
-  const [amountOfRowsError, setAmountOfRowsError] = useState(null);
+  // const [amountOfRowsError, setAmountOfRowsError] = useState(null);
   const [amountOfColumns, setAmountOfColumns] = useState(12);
   const [selectedColor, setSelectedColor] = useState(null);
   const [createdGrid, setCreatedGrid] = useState(null);
@@ -69,7 +69,15 @@ const App = (props) => {
   const createRow2 = (colors) => {
     const row = [];
     let concurrentBlankCount = 0;
-    for (let i = 0; i < amountOfColumns / 2; i++) {
+    let oddColumns = false;
+    let columnCount = 0;
+    if (amountOfColumns % 2 !== 0) {
+      oddColumns = true;
+      columnCount = (amountOfColumns / 2) - .5;
+    } else {
+      columnCount = amountOfColumns / 2;
+    }
+    for (let i = 0; i < columnCount; i++) {
       const random = Math.floor(Math.random() * 100);
       if (random > blackRatio && concurrentBlankCount < 3) {
         row.push(
@@ -97,14 +105,45 @@ const App = (props) => {
         concurrentBlankCount = 0;
       }
     }
+
+    let oddColumnFilled = [];
+    if (oddColumns) {
+      const random = Math.floor(Math.random() * 100);
+      if (random > blackRatio && concurrentBlankCount < 3) {
+        oddColumnFilled.push(
+          <Box
+            key={columnCount}
+            style={{
+              width: pixelSize,
+              height: pixelSize,
+              backgroundColor: 'black',
+            }}
+          />
+        );
+        concurrentBlankCount ++;
+      } else {
+        oddColumnFilled.push(
+          <Box
+            key={columnCount}
+            style={{
+              width: pixelSize,
+              height: pixelSize,
+              backgroundColor: colors[Math.floor(Math.random() * amountOfColors)],
+            }}
+          />
+        );
+        concurrentBlankCount = 0;
+      }
+    }
     const secondHalf = []
-    for (let i = (amountOfColumns / 2); i > -1; i--) {
+    for (let i = columnCount; i > -1; i--) {
       secondHalf.push(row[i]);
     }
 
     return (
       <Box display="flex" flexDirection="row">
         {row}
+        {oddColumns && oddColumnFilled}
         {secondHalf}
       </Box>
     );
@@ -297,12 +336,18 @@ const App = (props) => {
       const coinFlip = Math.floor(Math.random() * 2);
       let hex = "#";
       for (let i = 0; i < 6; i++) {
+        console.log(i);
         if (coinFlip === 0) {
-          hex += Math.floor(Math.random() * 10);
+          if (i === 0) {
+            hex +=Math.floor(Math.random() * (10 - 6 + 1) + 6);
+          } else {
+            hex += Math.floor(Math.random() * 10);
+          }
         } else {
           hex += hexLetters[Math.floor(Math.random() * 6)];
         }
       }
+      console.log(hex);
       randomHexes.push(hex);
     }
 
@@ -410,7 +455,7 @@ const App = (props) => {
           }}
           style={{ backgroundColor: 'white', marginLeft: 8 }}
         />
-        {amountOfRowsError && <Box style={{ color: 'red' }}>{amountOfRowsError}</Box>}
+        {/* {amountOfRowsError && <Box style={{ color: 'red' }}>{amountOfRowsError}</Box>} */}
         <TextField
           id="outlined-number"
           label="Columns"
@@ -445,12 +490,12 @@ const App = (props) => {
           <Button
             variant='contained' 
             onClick={() => {
-              if ((amountOfRows / 2).toString().includes('.5')) {
-                setAmountOfRowsError('Current implementation only supports even numbers of rows')
-              } else {
-                setAmountOfRowsError(null) 
+              // if ((amountOfRows / 2).toString().includes('.5')) {
+              //   setAmountOfRowsError('Current implementation only supports even numbers of rows')
+              // } else {
+                // setAmountOfRowsError(null) 
                 createBunchOfGrids()
-              }
+              // }
             }}
             style={{ margin: 8 }}
           >
